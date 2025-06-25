@@ -160,6 +160,7 @@
                     prompt = `Explain the following text from an English linguistic perspective (grammar, morphology, rhetoric, semantics, etc.):\n\n"${userText}"\n\n${separator}\nProvide tips for better learning and understanding this text.`;
                 }
 
+                console.log('Prompt sent to AI:', prompt); // Log the prompt
                 // Prepare the payload for the Gemini API
                 let chatHistory = [];
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
@@ -176,23 +177,30 @@
                     body: JSON.stringify(payload)
                 });
 
+                console.log('API Response status:', response.status); // Log response status
+
                 // Check if the response was successful
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
+                console.log('AI Response data:', result); // Log the full AI response
 
                 // Check for valid response structure
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     const rawExplanation = result.candidates[0].content.parts[0].text;
+                    console.log('Raw explanation from AI:', rawExplanation); // Log raw text
 
                     // Split the explanation and tips based on the separator
                     const parts = rawExplanation.split(separator);
                     let explanationContent = parts[0].trim();
                     let tipsContent = parts.length > 1 ? parts[1].trim() : '';
+
+                    console.log('Explanation content:', explanationContent); // Log separated explanation
+                    console.log('Tips content:', tipsContent); // Log separated tips
 
                     explanationOutput.innerHTML = explanationContent.replace(/\n/g, '<br>');
                     explanationContainer.classList.remove('hidden');
@@ -209,10 +217,11 @@
                         'لم يتمكن الذكاء الاصطناعي من تقديم شرح أو نصائح. الرجاء المحاولة مرة أخرى بنص مختلف.' :
                         'AI could not provide an explanation or tips. Please try again with different text.';
                     errorMessage.classList.remove('hidden');
+                    console.error('AI response did not contain expected content structure.');
                 }
 
             } catch (error) {
-                console.error('Error explaining text:', error);
+                console.error('Error explaining text:', error); // Log the full error object
                 errorMessage.textContent = isUserLangArabic ?
                     `حدث خطأ: ${error.message}. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.` :
                     `An error occurred: ${error.message}. Please check your internet connection and try again.`;
