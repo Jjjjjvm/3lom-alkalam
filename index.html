@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>علوم الكلام - The Science of Speech</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        /* Custom font import (optional, as Inter is often default or fallback) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-3xl w-full bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+        <h1 class="text-4xl font-extrabold text-center text-teal-700 mb-2 mt-4">
+            علوم الكلام
+        </h1>
+        <h2 class="text-xl font-medium text-center text-teal-600 mb-8">
+            The Science of Speech
+        </h2>
+        <p id="descriptionText" class="text-center text-gray-600 mb-6 text-lg">
+            أدخل نصًا وسيقوم الذكاء الاصطناعي بشرحه من منظور لغوي بلغة جهازك، مع تقديم نصائح للتعلم.
+        </p>
+
+        <div class="mb-6">
+            <label for="inputText" id="inputTextLabel" class="block text-gray-800 text-lg font-medium mb-2">
+                النص المراد شرحه:
+            </label>
+            <textarea
+                id="inputText"
+                class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 resize-y min-h-[150px] text-gray-800 text-base"
+                placeholder="اكتب نصك هنا لتبدأ الشرح..."
+            ></textarea>
+        </div>
+
+        <div class="mb-8">
+            <button
+                id="explainButton"
+                class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 flex items-center justify-center text-lg"
+            >
+                <span id="buttonText">اشرح النص</span>
+                <svg id="loadingSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="explanationContainer" class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-inner hidden">
+            <h2 id="explanationTitle" class="text-2xl font-semibold text-teal-800 mb-4 border-b pb-2 border-teal-200">
+                الشرح اللغوي:
+            </h2>
+            <div id="explanationOutput" class="text-gray-700 leading-relaxed text-base">
+                <!-- AI explanation will be displayed here -->
+            </div>
+            <div id="errorMessage" class="text-red-600 mt-4 hidden">
+                حدث خطأ أثناء جلب الشرح. يرجى المحاولة مرة أخرى.
+            </div>
+        </div>
+
+        <div id="tipsContainer" class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-inner mt-4 hidden">
+            <h2 id="tipsTitle" class="text-2xl font-semibold text-teal-800 mb-4 border-b pb-2 border-teal-200">
+                نصائح للتعلم:
+            </h2>
+            <div id="tipsOutput" class="text-gray-700 leading-relaxed text-base">
+                <!-- AI learning tips will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const descriptionText = document.getElementById('descriptionText');
+        const inputText = document.getElementById('inputText');
+        const inputTextLabel = document.getElementById('inputTextLabel');
+        const explainButton = document.getElementById('explainButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const explanationContainer = document.getElementById('explanationContainer');
+        const explanationTitle = document.getElementById('explanationTitle');
+        const explanationOutput = document.getElementById('explanationOutput');
+        const errorMessage = document.getElementById('errorMessage');
+        const tipsContainer = document.getElementById('tipsContainer');
+        const tipsTitle = document.getElementById('tipsTitle');
+        const tipsOutput = document.getElementById('tipsOutput');
+
+        // Determine user's preferred language from browser
+        const userLang = navigator.language || navigator.userLanguage; // Fallback for older browsers
+        const isUserLangArabic = userLang.startsWith('ar');
+
+        // Update UI text based on detected language
+        function updateUIText() {
+            if (isUserLangArabic) {
+                document.documentElement.setAttribute('lang', 'ar');
+                document.body.setAttribute('dir', 'rtl');
+                descriptionText.textContent = 'أدخل نصًا وسيقوم الذكاء الاصطناعي بشرحه من منظور لغوي بلغة جهازك، مع تقديم نصائح للتعلم.';
+                inputTextLabel.textContent = 'النص المراد شرحه:';
+                inputText.placeholder = 'اكتب نصك هنا لتبدأ الشرح...';
+                buttonText.textContent = 'اشرح النص';
+                explanationTitle.textContent = 'الشرح اللغوي:';
+                errorMessage.textContent = 'حدث خطأ أثناء جلب الشرح. يرجى المحاولة مرة أخرى.';
+                tipsTitle.textContent = 'نصائح للتعلم:';
+            } else {
+                document.documentElement.setAttribute('lang', 'en');
+                document.body.setAttribute('dir', 'ltr');
+                descriptionText.textContent = 'Enter text and AI will explain it from a linguistic perspective in your device\'s language, providing learning tips.';
+                inputTextLabel.textContent = 'Text to explain:';
+                inputText.placeholder = 'Write your text here to get an explanation...';
+                buttonText.textContent = 'Explain Text';
+                explanationTitle.textContent = 'Linguistic Explanation:';
+                errorMessage.textContent = 'An error occurred while fetching the explanation. Please try again.';
+                tipsTitle.textContent = 'Learning Tips:';
+            }
+        }
+
+        // Call once on load
+        updateUIText();
+
+        // Event listener for the explain button
+        explainButton.addEventListener('click', async () => {
+            const userText = inputText.value.trim();
+
+            if (!userText) {
+                if (isUserLangArabic) {
+                    alert('الرجاء إدخال نص لشرحه.');
+                } else {
+                    alert('Please enter text to explain.');
+                }
+                return;
+            }
+
+            // Show loading state and clear previous outputs
+            buttonText.textContent = isUserLangArabic ? 'جاري الشرح...' : 'Explaining...';
+            loadingSpinner.classList.remove('hidden');
+            explainButton.disabled = true;
+            explanationContainer.classList.add('hidden');
+            tipsContainer.classList.add('hidden'); // Hide tips container initially
+            errorMessage.classList.add('hidden');
+            explanationOutput.innerHTML = '';
+            tipsOutput.innerHTML = ''; // Clear tips output
+
+            try {
+                let prompt;
+                const separator = isUserLangArabic ? '---نصائح للتعلم---' : '---Learning Tips---';
+
+                if (isUserLangArabic) {
+                    prompt = `اشرح النص التالي من منظور اللغة العربية (نحو، صرف، بلاغة، دلالة، إلخ):\n\n"${userText}"\n\n${separator}\nقدم نصائح لتعلم وفهم هذا النص بشكل أفضل.`;
+                } else {
+                    prompt = `Explain the following text from an English linguistic perspective (grammar, morphology, rhetoric, semantics, etc.):\n\n"${userText}"\n\n${separator}\nProvide tips for better learning and understanding this text.`;
+                }
+
+                // Prepare the payload for the Gemini API
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+
+                // Define API key and URL for gemini-2.0-flash
+                const apiKey = ""; // Canvas will provide this dynamically
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                // Make the API call
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // Check if the response was successful
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // Check for valid response structure
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const rawExplanation = result.candidates[0].content.parts[0].text;
+
+                    // Split the explanation and tips based on the separator
+                    const parts = rawExplanation.split(separator);
+                    let explanationContent = parts[0].trim();
+                    let tipsContent = parts.length > 1 ? parts[1].trim() : '';
+
+                    explanationOutput.innerHTML = explanationContent.replace(/\n/g, '<br>');
+                    explanationContainer.classList.remove('hidden');
+
+                    if (tipsContent) {
+                        tipsOutput.innerHTML = tipsContent.replace(/\n/g, '<br>');
+                        tipsContainer.classList.remove('hidden'); // Show tips container if content exists
+                    } else {
+                        tipsContainer.classList.add('hidden'); // Ensure hidden if no tips
+                    }
+
+                } else {
+                    errorMessage.textContent = isUserLangArabic ?
+                        'لم يتمكن الذكاء الاصطناعي من تقديم شرح أو نصائح. الرجاء المحاولة مرة أخرى بنص مختلف.' :
+                        'AI could not provide an explanation or tips. Please try again with different text.';
+                    errorMessage.classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Error explaining text:', error);
+                errorMessage.textContent = isUserLangArabic ?
+                    `حدث خطأ: ${error.message}. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.` :
+                    `An error occurred: ${error.message}. Please check your internet connection and try again.`;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Reset loading state
+                buttonText.textContent = isUserLangArabic ? 'اشرح النص' : 'Explain Text';
+                loadingSpinner.classList.add('hidden');
+                explainButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
