@@ -78,17 +78,6 @@
             </div>
         </div>
 
-        <!-- Custom Console Section -->
-        <div id="customConsoleContainer" class="bg-gray-800 text-gray-100 p-4 rounded-xl mt-4 hidden">
-            <h2 id="customConsoleTitle" class="text-xl font-semibold text-white mb-2 border-b pb-2 border-gray-700">
-                وحدة التحكم (للمطور):
-            </h2>
-            <div id="customConsoleOutput" class="font-mono text-sm whitespace-pre-wrap max-h-48 overflow-y-auto">
-                <!-- Console messages will appear here -->
-            </div>
-        </div>
-        <!-- End Custom Console Section -->
-
     </div>
 
     <script>
@@ -106,46 +95,10 @@
         const tipsContainer = document.getElementById('tipsContainer');
         const tipsTitle = document.getElementById('tipsTitle');
         const tipsOutput = document.getElementById('tipsOutput');
-        const customConsoleContainer = document.getElementById('customConsoleContainer');
-        const customConsoleTitle = document.getElementById('customConsoleTitle');
-        const customConsoleOutput = document.getElementById('customConsoleOutput');
-
 
         // Determine user's preferred language from browser
         const userLang = navigator.language || navigator.userLanguage; // Fallback for older browsers
         const isUserLangArabic = userLang.startsWith('ar');
-
-        // Store original console functions
-        const originalConsoleLog = console.log;
-        const originalConsoleError = console.error;
-
-        // Function to append messages to the custom console
-        function appendToCustomConsole(message, type = 'log') {
-            const messageElement = document.createElement('div');
-            // Convert objects to JSON string for better readability in console
-            messageElement.textContent = typeof message === 'object' ? JSON.stringify(message, null, 2) : String(message);
-
-            if (type === 'error') {
-                messageElement.classList.add('text-red-400'); // Style errors differently
-            } else {
-                messageElement.classList.add('text-gray-100');
-            }
-            customConsoleOutput.appendChild(messageElement);
-            customConsoleOutput.scrollTop = customConsoleOutput.scrollHeight; // Scroll to bottom
-            customConsoleContainer.classList.remove('hidden'); // Ensure console is visible
-        }
-
-        // Override console.log and console.error to also print to custom console
-        console.log = function(...args) {
-            originalConsoleLog.apply(console, args); // Call original console.log
-            appendToCustomConsole(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' '), 'log');
-        };
-
-        console.error = function(...args) {
-            originalConsoleError.apply(console, args); // Call original console.error
-            appendToCustomConsole(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' '), 'error');
-        };
-
 
         // Update UI text based on detected language
         function updateUIText() {
@@ -159,7 +112,6 @@
                 explanationTitle.textContent = 'الشرح اللغوي:';
                 errorMessage.textContent = 'حدث خطأ أثناء جلب الشرح. يرجى المحاولة مرة أخرى.';
                 tipsTitle.textContent = 'نصائح للتعلم:';
-                customConsoleTitle.textContent = 'وحدة التحكم (للمطور):'; // New console title
             } else {
                 document.documentElement.setAttribute('lang', 'en');
                 document.body.setAttribute('dir', 'ltr');
@@ -170,7 +122,6 @@
                 explanationTitle.textContent = 'Linguistic Explanation:';
                 errorMessage.textContent = 'An error occurred while fetching the explanation. Please try again.';
                 tipsTitle.textContent = 'Learning Tips:';
-                customConsoleTitle.textContent = 'Developer Console:'; // New console title
             }
         }
 
@@ -181,18 +132,12 @@
         explainButton.addEventListener('click', async () => {
             const userText = inputText.value.trim();
 
-            // Clear custom console on new explanation attempt
-            customConsoleOutput.innerHTML = '';
-            customConsoleContainer.classList.add('hidden'); // Hide console until new output
-
-
             if (!userText) {
                 if (isUserLangArabic) {
                     alert('الرجاء إدخال نص لشرحه.');
                 } else {
                     alert('Please enter text to explain.');
                 }
-                console.log("User tried to explain empty text."); // Log to custom console
                 return;
             }
 
@@ -216,7 +161,6 @@
                     prompt = `Explain the following text from an English linguistic perspective (grammar, morphology, rhetoric, semantics, etc.):\n\n"${userText}"\n\n${separator}\nProvide tips for better learning and understanding this text.`;
                 }
 
-                console.log('Prompt sent to AI:', prompt); // Log the prompt
                 // Prepare the payload for the Gemini API
                 let chatHistory = [];
                 chatHistory.push({ role: "user", parts: [{ text: prompt }] });
@@ -233,30 +177,23 @@
                     body: JSON.stringify(payload)
                 });
 
-                console.log('API Response status:', response.status); // Log response status
-
                 // Check if the response was successful
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const result = await response.json();
-                console.log('AI Response data:', result); // Log the full AI response
 
                 // Check for valid response structure
                 if (result.candidates && result.candidates.length > 0 &&
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     const rawExplanation = result.candidates[0].content.parts[0].text;
-                    console.log('Raw explanation from AI:', rawExplanation); // Log raw text
 
                     // Split the explanation and tips based on the separator
                     const parts = rawExplanation.split(separator);
                     let explanationContent = parts[0].trim();
                     let tipsContent = parts.length > 1 ? parts[1].trim() : '';
-
-                    console.log('Explanation content:', explanationContent); // Log separated explanation
-                    console.log('Tips content:', tipsContent); // Log separated tips
 
                     explanationOutput.innerHTML = explanationContent.replace(/\n/g, '<br>');
                     explanationContainer.classList.remove('hidden');
@@ -273,11 +210,10 @@
                         'لم يتمكن الذكاء الاصطناعي من تقديم شرح أو نصائح. الرجاء المحاولة مرة أخرى بنص مختلف.' :
                         'AI could not provide an explanation or tips. Please try again with different text.';
                     errorMessage.classList.remove('hidden');
-                    console.error('AI response did not contain expected content structure.');
                 }
 
             } catch (error) {
-                console.error('Error explaining text:', error); // Log the full error object
+                console.error('Error explaining text:', error); // Log the full error object for internal debugging
                 errorMessage.textContent = isUserLangArabic ?
                     `حدث خطأ: ${error.message}. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.` :
                     `An error occurred: ${error.message}. Please check your internet connection and try again.`;
