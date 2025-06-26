@@ -3,228 +3,389 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>علوم الكلام - The Science of Speech</title>
-    <!-- Tailwind CSS CDN -->
+    <title id="page-title">مساعد اللغات الذكي</title>
+    <!-- Tailwind CSS for utility-first styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for English, Almarai for Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Marked.js to render Markdown from AI response into HTML -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
-        /* Custom styles for Inter font and general aesthetics */
+        /* Apply custom fonts based on language preference */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light gray background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'Almarai', sans-serif; /* Default for Arabic UI */
+            background-color: #f0f9ff; /* Light blue background */
         }
-        /* Custom font import (optional, as Inter is often default or fallback) */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        /* Specific font for English text sections */
+        .font-english {
+            font-family: 'Inter', sans-serif;
+            direction: ltr;
+            text-align: left;
+        }
+        /* Arabic specific font for titles */
+        .title-font-ar {
+            font-family: 'Almarai', sans-serif;
+        }
+        /* English specific font for titles */
+        .title-font-en {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom styles for the generated content */
+        .result-content h3 {
+            font-size: 1.5rem; /* Larger font size for headings */
+            font-weight: 700; /* Bold headings */
+            color: #0d9488; /* Teal 600 for emphasis */
+            margin-top: 1.5rem; /* Space above headings */
+            margin-bottom: 0.5rem; /* Space below headings */
+            padding-bottom: 0.5rem; /* Padding below for the border */
+            border-bottom: 2px solid #a7f3d0; /* Light green border for separation */
+        }
+        .result-content p {
+            line-height: 1.8; /* Increased line height for better readability */
+            margin-bottom: 1rem; /* Space between paragraphs */
+            color: #374151; /* Gray 700 for main text */
+        }
+        .result-content blockquote {
+            border-right: 4px solid #14b8a6; /* Right border for blockquotes */
+            padding-right: 1rem; /* Padding inside blockquotes */
+            margin-right: 0; /* No margin on the right */
+            font-style: italic; /* Italicize blockquote text */
+            color: #4b5563; /* Gray 600 for blockquote text */
+            background-color: #f0fdf4; /* Very light green background for blockquotes */
+            border-radius: 0.5rem;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        /* Styling for the loading spinner */
+        .loader {
+            border: 5px solid #f3f3f3; /* Light grey outer ring */
+            border-top: 5px solid #14b8a6; /* Teal colored spinning part */
+            border-radius: 50%; /* Make it circular */
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite; /* Spin animation */
+            margin: 2rem auto; /* Center the loader */
+        }
+        /* Keyframe animation for the spinner */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="max-w-3xl w-full bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-        <h1 class="text-4xl font-extrabold text-center text-teal-700 mb-2 mt-4">
-            علوم الكلام
-        </h1>
-        <h2 class="text-xl font-medium text-center text-teal-600 mb-8">
-            The Science of Speech
-        </h2>
-        <p id="descriptionText" class="text-center text-gray-600 mb-6 text-lg">
-            أدخل نصًا وسيقوم الذكاء الاصطناعي بشرحه من منظور لغوي بلغة جهازك، مع تقديم نصائح للتعلم.
-        </p>
+<body class="bg-blue-50 text-gray-800">
 
-        <div class="mb-6">
-            <label for="inputText" id="inputTextLabel" class="block text-gray-800 text-lg font-medium mb-2">
-                النص المراد شرحه:
-            </label>
-            <textarea
-                id="inputText"
-                class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition duration-200 resize-y min-h-[150px] text-gray-800 text-base"
-                placeholder="اكتب نصك هنا لتبدأ الشرح..."
-            ></textarea>
-        </div>
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
 
-        <div class="mb-8">
-            <button
-                id="explainButton"
-                class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 flex items-center justify-center text-lg"
-            >
-                <span id="buttonText">اشرح النص</span>
-                <svg id="loadingSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <!-- Header Section -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-800 title-font-ar" id="main-title">مساعد اللغات الذكي</h1>
+            <p class="text-lg text-gray-600 mt-2" id="subtitle">اطلب شرحاً، نصيحة، أو كتابة نص باللغة العربية أو الإنجليزية</p>
+        </header>
+
+        <!-- Input Form Section -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <!-- Language selection dropdown removed as per user request -->
+            <div class="mb-4">
+                <label for="query-input" class="block text-lg font-bold text-teal-700 mb-2" id="query-label">اكتب سؤالك أو طلبك هنا:</label>
+                <textarea id="query-input" rows="5" class="w-full p-4 border-2 border-teal-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all" placeholder="مثال: اشرح قاعدة 'present simple' في الإنجليزية"></textarea>
+            </div>
+            <button id="generate-button" class="w-full bg-teal-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300 transition-transform transform hover:scale-105">
+                <span id="button-text">توليد الإجابة</span>
+                <!-- SVG Spinner Icon (hidden by default) -->
+                <svg id="button-spinner" class="animate-spin h-5 w-5 text-white mx-auto hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
             </button>
         </div>
 
-        <div id="explanationContainer" class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-inner hidden">
-            <h2 id="explanationTitle" class="text-2xl font-semibold text-teal-800 mb-4 border-b pb-2 border-teal-200">
-                الشرح اللغوي:
-            </h2>
-            <div id="explanationOutput" class="text-gray-700 leading-relaxed text-base">
-                <!-- AI explanation will be displayed here -->
-            </div>
-            <div id="errorMessage" class="text-red-600 mt-4 hidden">
-                حدث خطأ أثناء جلب الشرح. يرجى المحاولة مرة أخرى.
+        <!-- Results Display Section -->
+        <div id="results-container" class="bg-white p-6 rounded-2xl shadow-lg min-h-[250px]">
+            <!-- Loader will be shown here when fetching data -->
+            <div id="loader" class="loader hidden"></div>
+            <!-- Initial message or AI-generated results will be displayed here -->
+            <div id="results-content" class="result-content">
+                <div class="text-center text-gray-500">
+                    <h2 class="text-2xl title-font-ar text-teal-700" id="welcome-title">مرحباً بك!</h2>
+                    <p id="welcome-message">
+                        اكتب سؤالك للحصول على شروحات ونصائح ونصوص باللغة العربية أو الإنجليزية.
+                        <br class="hidden sm:inline">
+                        (يتم تحديد لغة الواجهة والإجابة تلقائياً حسب لغة جهازك)
+                    </p>
+                </div>
             </div>
         </div>
 
-        <div id="tipsContainer" class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-inner mt-4 hidden">
-            <h2 id="tipsTitle" class="text-2xl font-semibold text-teal-800 mb-4 border-b pb-2 border-teal-200">
-                نصائح للتعلم:
-            </h2>
-            <div id="tipsOutput" class="text-gray-700 leading-relaxed text-base">
-                <!-- AI learning tips will be displayed here -->
-            </div>
-        </div>
+        <!-- Footer Section -->
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>تم التطوير بواسطة Gemini. لأغراض المساعدة التعليمية فقط.</p>
+        </footer>
 
     </div>
 
     <script>
         // Get references to DOM elements
-        const descriptionText = document.getElementById('descriptionText');
-        const inputText = document.getElementById('inputText');
-        const inputTextLabel = document.getElementById('inputTextLabel');
-        const explainButton = document.getElementById('explainButton');
-        const buttonText = document.getElementById('buttonText');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const explanationContainer = document.getElementById('explanationContainer');
-        const explanationTitle = document.getElementById('explanationTitle');
-        const explanationOutput = document.getElementById('explanationOutput');
-        const errorMessage = document.getElementById('errorMessage');
-        const tipsContainer = document.getElementById('tipsContainer');
-        const tipsTitle = document.getElementById('tipsTitle');
-        const tipsOutput = document.getElementById('tipsOutput');
+        const generateButton = document.getElementById('generate-button');
+        const buttonText = document.getElementById('button-text');
+        const buttonSpinner = document.getElementById('button-spinner');
+        // Removed languageSelect as it's no longer used for manual selection
+        const queryInput = document.getElementById('query-input');
+        const resultsContent = document.getElementById('results-content');
+        const loader = document.getElementById('loader');
 
-        // Determine user's preferred language from browser
-        const userLang = navigator.language || navigator.userLanguage; // Fallback for older browsers
-        const isUserLangArabic = userLang.startsWith('ar');
+        // UI elements for language switching
+        const pageTitle = document.getElementById('page-title'); // Added page title element
+        const mainTitle = document.getElementById('main-title');
+        const subtitle = document.getElementById('subtitle');
+        // Removed selectLanguageLabel
+        const queryLabel = document.getElementById('query-label');
+        const welcomeTitle = document.getElementById('welcome-title');
+        const welcomeMessage = document.getElementById('welcome-message');
 
-        // Update UI text based on detected language
-        function updateUIText() {
-            if (isUserLangArabic) {
-                document.documentElement.setAttribute('lang', 'ar');
-                document.body.setAttribute('dir', 'rtl');
-                descriptionText.textContent = 'أدخل نصًا وسيقوم الذكاء الاصطناعي بشرحه من منظور لغوي بلغة جهازك، مع تقديم نصائح للتعلم.';
-                inputTextLabel.textContent = 'النص المراد شرحه:';
-                inputText.placeholder = 'اكتب نصك هنا لتبدأ الشرح...';
-                buttonText.textContent = 'اشرح النص';
-                explanationTitle.textContent = 'الشرح اللغوي:';
-                errorMessage.textContent = 'حدث خطأ أثناء جلب الشرح. يرجى المحاولة مرة أخرى.';
-                tipsTitle.textContent = 'نصائح للتعلم:';
-            } else {
-                document.documentElement.setAttribute('lang', 'en');
-                document.body.setAttribute('dir', 'ltr');
-                descriptionText.textContent = 'Enter text and AI will explain it from a linguistic perspective in your device\'s language, providing learning tips.';
-                inputTextLabel.textContent = 'Text to explain:';
-                inputText.placeholder = 'Write your text here to get an explanation...';
-                buttonText.textContent = 'Explain Text';
-                explanationTitle.textContent = 'Linguistic Explanation:';
-                errorMessage.textContent = 'An error occurred while fetching the explanation. Please try again.';
-                tipsTitle.textContent = 'Learning Tips:';
+        // Store translations for UI elements
+        const uiTexts = {
+            arabic: {
+                pageTitle: 'مساعد اللغات الذكي',
+                mainTitle: 'مساعد اللغات الذكي',
+                subtitle: 'اطلب شرحاً، نصيحة، أو كتابة نص باللغة العربية أو الإنجليزية',
+                queryLabel: 'اكتب سؤالك أو طلبك هنا:',
+                queryPlaceholder: 'مثال: اشرح قاعدة "present simple" في الإنجليزية',
+                buttonText: 'توليد الإجابة',
+                welcomeTitle: 'مرحباً بك!',
+                welcomeMessage: 'اكتب سؤالك للحصول على شروحات ونصائح ونصوص باللغة العربية أو الإنجليزية.<br class="hidden sm:inline">(يتم تحديد لغة الواجهة والإجابة تلقائياً حسب لغة جهازك)',
+                footer: 'تم التطوير بواسطة Gemini. لأغراض المساعدة التعليمية فقط.',
+                emptyInputError: 'الرجاء إدخال سؤال أو طلب قبل البدء.',
+                apiErrorTitle: 'حدث خطأ',
+                apiErrorMessage: 'عذراً، لم نتمكن من معالجة طلبك. يرجى المحاولة مرة أخرى لاحقاً.',
+                aiNoResponse: 'لم يتمكن الذكاء الاصطناعي من تكوين إجابة. قد يكون السؤال غير واضح أو خارج نطاق المعرفة.'
+            },
+            english: {
+                pageTitle: 'Smart Language Assistant',
+                mainTitle: 'Smart Language Assistant',
+                subtitle: 'Ask for explanations, tips, or text generation in Arabic or English',
+                queryLabel: 'Enter your question or request here:',
+                queryPlaceholder: 'Example: Explain the "present simple" rule in English',
+                buttonText: 'Generate Answer',
+                welcomeTitle: 'Welcome!',
+                welcomeMessage: 'Type your question to get explanations, tips, and texts in Arabic or English.<br class="hidden sm:inline">(Interface and answer language are automatically determined by your device language)',
+                footer: 'Developed by Gemini. For educational assistance only.',
+                emptyInputError: 'Please enter a question or request before proceeding.',
+                apiErrorTitle: 'An Error Occurred',
+                apiErrorMessage: 'Sorry, we could not process your request. Please try again later.',
+                aiNoResponse: 'The AI could not generate a response. The question might be unclear or out of scope.'
+            }
+        };
+
+        // --- Initial Language Setup ---
+        // Detect browser language and set UI accordingly
+        const userLang = navigator.language || navigator.userLanguage;
+        // Determine the UI language based on device language. Defaults to English if not Arabic.
+        const currentUILanguage = userLang.startsWith('ar') ? 'arabic' : 'english';
+        
+        // Function to update all UI text based on the detected language
+        function updateUI(lang) {
+            pageTitle.textContent = uiTexts[lang].pageTitle; // Update page title
+            mainTitle.textContent = uiTexts[lang].mainTitle;
+            mainTitle.className = lang === 'arabic' ? 'text-4xl md:text-5xl font-bold text-teal-800 title-font-ar' : 'text-4xl md:text-5xl font-bold text-teal-800 title-font-en';
+            subtitle.textContent = uiTexts[lang].subtitle;
+            // selectLanguageLabel is removed from HTML
+            queryLabel.textContent = uiTexts[lang].queryLabel;
+            queryInput.placeholder = uiTexts[lang].queryPlaceholder;
+            buttonText.textContent = uiTexts[lang].buttonText;
+            welcomeTitle.textContent = uiTexts[lang].welcomeTitle;
+            welcomeTitle.className = lang === 'arabic' ? 'text-2xl title-font-ar text-teal-700' : 'text-2xl title-font-en text-teal-700';
+            welcomeMessage.innerHTML = uiTexts[lang].welcomeMessage;
+            document.querySelector('footer p').textContent = uiTexts[lang].footer;
+            
+            // Set the direction of the HTML document (entire page) based on language
+            document.documentElement.dir = lang === 'arabic' ? 'rtl' : 'ltr';
+            // Apply or remove English font class to the body and results content
+            document.body.classList.toggle('font-english', lang === 'english');
+            resultsContent.classList.toggle('font-english', lang === 'english');
+
+            // No need to set languageSelect.value as the dropdown is removed
+        }
+
+        // Apply initial UI language based on device on page load
+        updateUI(currentUILanguage);
+
+        // Event listener for language selection change removed as dropdown is gone
+
+        // --- Event Listener for the Generate Button ---
+        generateButton.addEventListener('click', handleGeneration);
+        
+        // Allow pressing Enter key to trigger the generation, preventing a new line
+        queryInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { // Check for Enter key without Shift
+                e.preventDefault(); // Prevents the default behavior of adding a new line
+                handleGeneration(); // Call the generation function
+            }
+        });
+
+
+        /**
+         * Handles the language explanation/generation request.
+         * It validates input, shows a loading state, calls the AI model, and displays the result.
+         */
+        async function handleGeneration() {
+            const userQuery = queryInput.value.trim(); // Get and trim the user's query
+            // The language for the AI's response is now always based on the device's UI language.
+            const responseLanguage = currentUILanguage; 
+
+            // Validate if the input field is empty
+            if (!userQuery) {
+                resultsContent.innerHTML = `<p class="text-center text-red-600 font-bold">${uiTexts[currentUILanguage].emptyInputError}</p>`;
+                resultsContent.classList.toggle('font-english', currentUILanguage === 'english');
+                return; // Exit if no query is provided
+            }
+
+            // --- Set UI to Loading State ---
+            setLoadingState(true); // Show spinner and disable button
+
+            try {
+                // --- Construct the prompt for the AI model ---
+                // The prompt instructs the AI on how to format its response (Markdown with specific sections)
+                let aiPrompt = '';
+                if (responseLanguage === 'arabic') {
+                    aiPrompt = `
+                    أنت خبير في اللغة العربية ومُعلم ممتاز. مهمتك هي الإجابة على استفسارات المستخدمين وتقديم نصائح أو كتابة نصوص باللغة العربية الفصحى.
+
+                    سؤال/طلب المستخدم: "${userQuery}"
+
+                    يجب أن تكون إجابتك منظمة بوضوح في الأقسام التالية باستخدام تنسيق Markdown:
+
+                    ### الشرح أو النصيحة
+                    - قدم شرحاً مفصلاً أو نصيحة عملية حول طلب المستخدم.
+                    - استخدم لغة واضحة ومبسطة، مع الأمثلة إذا لزم الأمر.
+
+                    ### أمثلة أو تطبيقات
+                    - إذا كان الطلب يتعلق بقاعدة لغوية، قدم أمثلة توضيحية.
+                    - إذا كان الطلب لكتابة نص، قدم النص المطلوب هنا.
+
+                    ### نقاط إضافية (اختياري)
+                    - أي معلومات إضافية مفيدة أو نصائح لتحسين المهارات اللغوية ذات الصلة.
+
+                    تأكد من أن الإجابة دقيقة ومفيدة وذات صلة مباشرة بطلب المستخدم.
+                    `;
+                } else { // English
+                    aiPrompt = `
+                    You are an expert in the English language and an excellent teacher. Your task is to answer user queries, provide tips, or write texts in standard English.
+
+                    User's question/request: "${userQuery}"
+
+                    Your answer should be clearly organized in the following sections using Markdown format:
+
+                    ### Explanation or Advice
+                    - Provide a detailed explanation or practical advice regarding the user's request.
+                    - Use clear and simple language, with examples if necessary.
+
+                    ### Examples or Applications
+                    - If the request is related to a language rule, provide illustrative examples.
+                    - If the request is to write a text, provide the requested text here.
+
+                    ### Additional Points (Optional)
+                    - Any useful additional information or tips to improve related language skills.
+
+                    Ensure the answer is accurate, helpful, and directly relevant to the user's request.
+                    `;
+                }
+                
+                // --- Call the Gemini API ---
+                const generatedText = await callGeminiAPI(aiPrompt);
+
+                // --- Display the result ---
+                // Use marked.js to convert the Markdown response from the AI into HTML
+                resultsContent.innerHTML = marked.parse(generatedText);
+                // Apply English font and LTR direction if the response language is English
+                resultsContent.classList.toggle('font-english', responseLanguage === 'english');
+
+            } catch (error) {
+                // Handle any errors that occur during the API call or processing
+                console.error("Error calling Gemini API:", error);
+                resultsContent.innerHTML = `
+                    <div class="text-center text-red-700 ${currentUILanguage === 'english' ? 'font-english' : ''}">
+                        <h3 class="font-bold text-xl">${uiTexts[currentUILanguage].apiErrorTitle}</h3>
+                        <p>${uiTexts[currentUILanguage].apiErrorMessage}</p>
+                        <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                // --- Restore UI from Loading State ---
+                setLoadingState(false); // Hide spinner and re-enable button
             }
         }
 
-        // Call once on load
-        updateUIText();
-
-        // Event listener for the explain button
-        explainButton.addEventListener('click', async () => {
-            const userText = inputText.value.trim();
-
-            if (!userText) {
-                if (isUserLangArabic) {
-                    alert('الرجاء إدخال نص لشرحه.');
-                } else {
-                    alert('Please enter text to explain.');
-                }
-                return;
+        /**
+         * Toggles the UI elements between loading and idle states.
+         * @param {boolean} isLoading - True to show loading indicators and disable input, false to hide them.
+         */
+        function setLoadingState(isLoading) {
+            if (isLoading) {
+                generateButton.disabled = true; // Disable the button to prevent multiple submissions
+                buttonText.classList.add('hidden'); // Hide the button text
+                buttonSpinner.classList.remove('hidden'); // Show the spinner icon
+                resultsContent.classList.add('hidden'); // Hide the previous results
+                loader.classList.remove('hidden'); // Show the main loader
+            } else {
+                generateButton.disabled = false; // Enable the button
+                buttonText.classList.remove('hidden'); // Show the button text
+                buttonSpinner.classList.add('hidden'); // Hide the spinner icon
+                resultsContent.classList.remove('hidden'); // Show the results area
+                loader.classList.add('hidden'); // Hide the main loader
             }
+        }
 
-            // Show loading state and clear previous outputs
-            buttonText.textContent = isUserLangArabic ? 'جاري الشرح...' : 'Explaining...';
-            loadingSpinner.classList.remove('hidden');
-            explainButton.disabled = true;
-            explanationContainer.classList.add('hidden');
-            tipsContainer.classList.add('hidden'); // Hide tips container initially
-            errorMessage.classList.add('hidden');
-            explanationOutput.innerHTML = '';
-            tipsOutput.innerHTML = ''; // Clear tips output
+        /**
+         * Calls the Gemini API to get the answer based on the provided prompt.
+         * @param {string} prompt - The text prompt to send to the Gemini model.
+         * @returns {Promise<string>} - A promise that resolves with the generated text from the model.
+         * @throws {Error} If the API request fails or the response structure is unexpected.
+         */
+        async function callGeminiAPI(prompt) {
+            let chatHistory = [];
+            // Add the user's prompt to the chat history as a user message
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory }; // Construct the payload for the API request
+            
+            // The API key is left as an empty string, as it will be automatically provided by the Canvas environment.
+            const apiKey = "AIzaSyCkN_5SuUfS_21mlzQ0BL3XE74Eh36W2Jw"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-            try {
-                let prompt;
-                const separator = isUserLangArabic ? '---نصائح للتعلم---' : '---Learning Tips---';
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload) // Send the payload as a JSON string
+            });
 
-                if (isUserLangArabic) {
-                    prompt = `اشرح النص التالي من منظور اللغة العربية (نحو، صرف، بلاغة، دلالة، إلخ):\n\n"${userText}"\n\n${separator}\nقدم نصائح لتعلم وفهم هذا النص بشكل أفضل.`;
-                } else {
-                    prompt = `Explain the following text from an English linguistic perspective (grammar, morphology, rhetoric, semantics, etc.):\n\n"${userText}"\n\n${separator}\nProvide tips for better learning and understanding this text.`;
-                }
-
-                // Prepare the payload for the Gemini API
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = { contents: chatHistory };
-
-                // Define API key and URL for gemini-2.0-flash
-                const apiKey = "AIzaSyCkN_5SuUfS_21mlzQ0BL3XE74Eh36W2Jw"; // Canvas will provide this dynamically
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                // Make the API call
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                // Check if the response was successful
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-
-                // Check for valid response structure
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const rawExplanation = result.candidates[0].content.parts[0].text;
-
-                    // Split the explanation and tips based on the separator
-                    const parts = rawExplanation.split(separator);
-                    let explanationContent = parts[0].trim();
-                    let tipsContent = parts.length > 1 ? parts[1].trim() : '';
-
-                    explanationOutput.innerHTML = explanationContent.replace(/\n/g, '<br>');
-                    explanationContainer.classList.remove('hidden');
-
-                    if (tipsContent) {
-                        tipsOutput.innerHTML = tipsContent.replace(/\n/g, '<br>');
-                        tipsContainer.classList.remove('hidden'); // Show tips container if content exists
-                    } else {
-                        tipsContainer.classList.add('hidden'); // Ensure hidden if no tips
-                    }
-
-                } else {
-                    errorMessage.textContent = isUserLangArabic ?
-                        'لم يتمكن الذكاء الاصطناعي من تقديم شرح أو نصائح. الرجاء المحاولة مرة أخرى بنص مختلف.' :
-                        'AI could not provide an explanation or tips. Please try again with different text.';
-                    errorMessage.classList.remove('hidden');
-                }
-
-            } catch (error) {
-                console.error('Error explaining text:', error); // Log the full error object for internal debugging
-                errorMessage.textContent = isUserLangArabic ?
-                    `حدث خطأ: ${error.message}. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.` :
-                    `An error occurred: ${error.message}. Please check your internet connection and try again.`;
-                errorMessage.classList.remove('hidden');
-            } finally {
-                // Reset loading state
-                buttonText.textContent = isUserLangArabic ? 'اشرح النص' : 'Explain Text';
-                loadingSpinner.classList.add('hidden');
-                explainButton.disabled = false;
+            // Check if the API response was successful
+            if (!response.ok) {
+                const errorBody = await response.json(); // Parse the error response body
+                console.error("API Error Response:", errorBody);
+                throw new Error(`API request failed with status ${response.status}. See console for details.`);
             }
-        });
+            
+            const result = await response.json(); // Parse the successful response
+
+            // Validate the structure of the API response to ensure it contains the generated text
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                return result.candidates[0].content.parts[0].text; // Return the generated text
+            } else {
+                // Handle cases where the response structure is unexpected or content is missing
+                console.error("Unexpected API response structure:", result);
+                if (result.promptFeedback && result.promptFeedback.blockReason) {
+                    throw new Error(`Request was blocked. Reason: ${result.promptFeedback.blockReason}`);
+                }
+                throw new Error(uiTexts[currentUILanguage].aiNoResponse);
+            }
+        }
     </script>
+
 </body>
 </html>
